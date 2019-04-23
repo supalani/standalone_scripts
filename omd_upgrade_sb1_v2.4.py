@@ -291,7 +291,7 @@ def restart_dir_gui_helper():
 
 ###helper code block for cache server list
 def list_cache_server_helper():
-    director_ui_login = '{"username":"omdadmin","password":"default"}'
+    director_ui_login = '{"username":"omdadmin","password":"xxx"}'
     web_protocol = 'https'
     api_base_url = web_protocol + a_colon + 2 * a_fwd_slash + hn_primary_dir_wrkr + a_colon
     api_login = api_base_url + '8099/OMD/login'
@@ -314,7 +314,7 @@ def cache_admin_status_helper(cache_name, admin_status):
     list_cache_server_helper()
     filter_cache_server = {}
     cache_server_id = {}
-    director_ui_login = '{"username":"omdadmin","password":"default"}'
+    director_ui_login = '{"username":"omdadmin","password":"xxx"}'
     web_protocol = 'https'
     api_base_url = web_protocol + a_colon + 2 * a_fwd_slash + hn_primary_dir_wrkr + a_colon
     api_login = api_base_url + '8099/OMD/login'
