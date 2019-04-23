@@ -276,7 +276,6 @@ def high_state_helper(host_name):
         else:
             return True
 
-
 ###helper code block for killing existing director gui session
 def restart_dir_gui_helper():
     get_dir_gui_docker_id = "sudo docker ps | awk '/director_gui/ {print $1}'"
@@ -353,7 +352,6 @@ def reboot_cache_helper(cache_name):
 def cache_online_helper(cache_name):
     admin_status = 'ONLINE'
     return cache_admin_status_helper(cache_name, admin_status)
-
     
 ##helper functions for local main()
 ###heading of code block
@@ -378,7 +376,6 @@ def show_status_helper(source_path = None):
 ##executor / coroutine function for local main()
 def process_menu(pass_knc = None, pass_send_key = None):
     pass_send_key.send(pass_knc)
-
 
 def source_server_list_file(sip = None, spath = None, pass_send_key = None):
     while True:
@@ -424,7 +421,6 @@ def untar_file(pass_send_key = None):
                     monitor_send_key.append(j)
                     break
             pass_send_key.send(monitor_send_key)
-
         elif txt_tar_format in send_key:
             exec_cmd = cmd_tar + a_space + txt_tar_attribute + a_space + send_key
             print txt_extract + txt_ing + 3 * a_dot + a_space + send_key
@@ -495,15 +491,13 @@ def rm_source_rpm_tar(pass_send_key = None):
 def apply_pre_config(pass_send_key = None):
     while True:
         send_key = (yield)
-        global upgrade_log_path
-        
+        global upgrade_log_path        
         upgrade_log_path = os.getcwd() + a_fwd_slash + find_pkg_helper(send_key) + txt_upgrade + a_dash + txt_log
         exec_cmd_2 = key_name_component[0] + a_space + a_double_quote + hn_salt_master + a_dot + domain_name + a_double_quote + a_space + \
                      cmd_salt_1 + a_space + txt_role + a_underbar + txt_parse + a_space + 2 * a_r_arrow + a_space + upgrade_log_path + a_fwd_slash + \
                      txt_role + a_underbar + txt_parse + a_underbar + txt_log + a_dot + txt_txt_format
         exec_cmd_3 = cmd_tail + a_space + str(cmd_tail_6) + a_space + upgrade_log_path + a_fwd_slash + txt_role + a_underbar + txt_parse + a_underbar + \
                      txt_log + a_dot + txt_txt_format
-        #exec_cmd_4 =
 
         if key_name_component[0] in send_key: #salt
             os.mkdir(upgrade_log_path)
@@ -731,8 +725,7 @@ def apply_post_config():
 #main funtion
 def main():
     try:
-        block_lable = code_block_lable()
-		
+        block_lable = code_block_lable()		
         print ('\x1b[3;34;46m' + block_lable.next() + '\x1b[0m')
         while True:
             try:
@@ -742,12 +735,10 @@ def main():
             except AddressValueError as e:
                 print txt_error.upper() + a_space + a_colon + a_space, e
                 continue
-            break
-        
+            break        
         source_path = show_status_helper(source_path_helper(raw_input(txt_source + a_space + txt_path + a_space + a_colon + a_space)))
         while source_path == 1:
             source_path = show_status_helper(source_path_helper(raw_input(txt_source + a_space + txt_path + a_space + a_colon + a_space)))
-
         print ('\x1b[3;34;46m' + block_lable.next() + '\x1b[0m')
 	print ('\x1b[3;34;46m' + block_lable.next() + '\x1b[0m')
 	choose_component_key = str(raw_input(txt_input + a_space + txt_key + a_space + a_colon + a_space))	
@@ -759,11 +750,9 @@ def main():
             print ('\x1b[3;34;46m' + block_lable.next() + '\x1b[0m')
             cor_sequence(choose_component_key, source_ip, source_path)
         else:
-            print txt_error.upper() + a_space + a_colon + a_space + txt_error + a_space + txt_in + a_space + txt_the + a_space + txt_key
-     
+            print txt_error.upper() + a_space + a_colon + a_space + txt_error + a_space + txt_in + a_space + txt_the + a_space + txt_key     
     except:
-        pass
-    
+        pass    
     finally:
         exec_cmd_helper('rm -fr omd_core_packages')
         sys.exit(0)
