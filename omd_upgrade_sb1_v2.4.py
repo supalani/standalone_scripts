@@ -1,16 +1,17 @@
 #!/usr/bin/python2.7
-from subprocess import *
-from ipaddress import *
 import requests
+import json
 import sys
 import os
 import time
-import json
+
+from subprocess import *
+from ipaddress import *
 
 # > title
 ## > heading
 ### > section
-#some text# > to be developed
+#some text# > to be developed if needed
 
 #global variables for pre/post configuration of the omd components
 ##variables for setup.
@@ -147,10 +148,9 @@ role_splunk_indexer = 'roles:splunk_indexer'
 role_splunk_ssh= 'roles:splunk_summarysearchhead'
 
 ##variables for argument
-source_ip = ''
+source_ip = '' #mgmt_svr
 source_path = ''
 choose_component_key = ''
-mgmt_svr = ''
 
 ##variables for log
 upgrade_log_path = ''
@@ -162,7 +162,6 @@ server_list_json = ''
 
 #medthods for procedure, logic, calculation and display
 ##helper functions for executor / coroutine functions
-
 ###helper code block for executing command
 def exec_cmd_helper(exec_cmd):
     exec_cmd_status = Popen(exec_cmd, stdin=None, stdout=PIPE, stderr=PIPE, shell=True)
@@ -255,7 +254,8 @@ def high_state_helper(host_name):
 ###helper code block for killing existing director gui session
 def restart_dir_gui_helper():
     get_dir_gui_docker_id = "sudo docker ps | awk '/director_gui/ {print $1}'"
-    ssh_to_mgmt_linux = txt_ssh  + a_space + user_root + a_at + str(mgmt_svr) + a_space
+    ssh_to_mgmt_linux = txt_ssh  + a_space + user_root + a_at + str(source_ip) + a_space
+    print 'mgmt_svr', ssh_to_mgmt_linux
     ssh_to_dir_wrkr = ssh_to_mgmt_linux + txt_ssh + a_space + user_ocdn_adm + a_at + hn_primary_dir_wrkr + a_space
     cmd_exec_get_dir_gui_docker_id = ssh_to_dir_wrkr + get_dir_gui_docker_id
     dir_gui_docker_id = exec_cmd_helper(cmd_exec_get_dir_gui_docker_id)
@@ -406,12 +406,12 @@ def scp_file(sip = None, spath = None, pass_send_key = None):
         if isinstance(send_key, list):
             for i in send_key:
                 exec_cmd = txt_scp + a_space + user_root + a_at +  sip + a_colon + spath + a_fwd_slash + i + a_space + os.getcwd()
-                print txt_copy + txt_ing + 3 * a_dot + a_space + i
+                print a_line + txt_copy + txt_ing + 3 * a_dot + a_space + i
                 exec_cmd_helper(exec_cmd)
             pass_send_key.send(send_key)
         else:
             exec_cmd = txt_scp + a_space + user_root + a_at + sip + a_colon + spath + a_fwd_slash + send_key + a_space + os.getcwd()
-            print txt_copy + txt_ing + 3 * a_dot + a_space + send_key
+            print a_line + txt_copy + txt_ing + 3 * a_dot + a_space + send_key
             exec_cmd_helper(exec_cmd)
             pass_send_key.send(send_key)
 
@@ -693,10 +693,10 @@ def apply_post_config():
             print ('\x1b[3;30;47m' + key_name_component[2] + a_space + txt_is + a_space + txt_deploy + txt_ed + a_space + icon_smiley + '\x1b[0m')
         elif key_name_component[3] in send_key: #monitor and monitor client
             print ('\x1b[3;30;47m' + key_name_component[3] + a_space + txt_is + a_space + txt_deploy + txt_ed + a_space + icon_smiley + '\x1b[0m')
-            print 'please verify the MONITOR installation manually as OMD Install and Upgrade Guide recommended'
+            print 'INFO: please verify the MONITOR installation manually as OMD Install and Upgrade Guide recommended'
         elif key_name_component[4] in send_key: # insight
             print('\x1b[3;30;47m' + key_name_component[4] + a_space + txt_is + a_space + txt_deploy + txt_ed + a_space + icon_smiley + '\x1b[0m')
-            print 'please verify the INSIGHT installation manually as OMD Install and Upgrade Guide recommended'
+            print 'INFO: please verify the INSIGHT installation manually as OMD Install and Upgrade Guide recommended'
 
 #main funtion
 def main():
@@ -706,8 +706,6 @@ def main():
         while True:
             try:
                 source_ip = IPv4Address(unicode(raw_input(txt_source + a_space + txt_ip + a_space + a_colon + a_space)))
-                global mgmt_svr
-                mgmt_svr = str(source_ip)
             except AddressValueError as e:
                 print txt_error.upper() + a_space + a_colon + a_space, e
                 continue
