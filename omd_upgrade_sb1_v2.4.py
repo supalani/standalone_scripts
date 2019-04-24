@@ -382,6 +382,8 @@ def code_block_lable():
 
 ##executor / coroutine function for local main()
 def process_menu(pass_knc = None, pass_send_key = None):
+    epoch_time = time.time()
+    print txt_start.upper() + txt_is[-1].upper() + a_space + a_at, time.strftime("%a, %d %b %Y %H:%M:%S %Z", time.localtime(epoch_time))
     pass_send_key.send(pass_knc)
 
 def source_server_list_file(sip = None, spath = None, pass_send_key = None):
@@ -406,12 +408,12 @@ def scp_file(sip = None, spath = None, pass_send_key = None):
         if isinstance(send_key, list):
             for i in send_key:
                 exec_cmd = txt_scp + a_space + user_root + a_at +  sip + a_colon + spath + a_fwd_slash + i + a_space + os.getcwd()
-                print a_line + txt_copy + txt_ing + 3 * a_dot + a_space + i
+                print txt_copy + txt_ing + 3 * a_dot + a_space + i
                 exec_cmd_helper(exec_cmd)
             pass_send_key.send(send_key)
         else:
             exec_cmd = txt_scp + a_space + user_root + a_at + sip + a_colon + spath + a_fwd_slash + send_key + a_space + os.getcwd()
-            print a_line + txt_copy + txt_ing + 3 * a_dot + a_space + send_key
+            print txt_copy + txt_ing + 3 * a_dot + a_space + send_key
             exec_cmd_helper(exec_cmd)
             pass_send_key.send(send_key)
 
@@ -697,7 +699,8 @@ def apply_post_config():
         elif key_name_component[4] in send_key: # insight
             print('\x1b[3;30;47m' + key_name_component[4] + a_space + txt_is + a_space + txt_deploy + txt_ed + a_space + icon_smiley + '\x1b[0m')
             print 'INFO: please verify the INSIGHT installation manually as OMD Install and Upgrade Guide recommended'
-
+        epoch_time = time.time()
+        print txt_complete.upper() + txt_is[-1].upper() + a_space + a_at, time.strftime("%a, %d %b %Y %H:%M:%S %Z", time.localtime(epoch_time))
 #main funtion
 def main():
     try:
