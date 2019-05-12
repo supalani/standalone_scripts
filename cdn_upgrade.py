@@ -415,7 +415,7 @@ def code_block_lable():
 
 ##executor / coroutine function for local main()
 def process_menu(pass_knc = None, pass_send_key = None):
-    logging.info('omd-' + pass_knc + a_dash + txt_install + a_space + txt_start + txt_is[-1])
+    logging.info('omd-' + pass_knc + a_dash + txt_upgrade + a_space + txt_start + txt_is[-1])
     pass_send_key.send(pass_knc)
 
 def source_server_list_file(sip = None, spath = None, pass_send_key = None):
@@ -701,11 +701,11 @@ def apply_post_config():
             salt_clear_cache_helper()
         elif key_name_component[3] in send_key: #monitor and monitor client
             salt_clear_cache_helper()
-            logging.info('verify the MONITOR installation manually as OMD Upgrade Guide recommended')
+            logging.info('verify the MONITOR upgrade manually as OMD Upgrade Guide recommended')
         elif key_name_component[4] in send_key: # insight
             salt_clear_cache_helper()
-            logging.info('verify the INSIGHT installation manually as OMD Upgrade Guide recommended')
-        logging.info(send_key + txt_install + a_space + txt_is + a_space + txt_complete + txt_ed[-1] + a_line)
+            logging.info('verify the INSIGHT upgrade manually as OMD Upgrade Guide recommended')
+        logging.info(send_key + txt_upgrade + a_space + txt_is + a_space + txt_complete + txt_ed[-1] + a_line)
 #main funtion
 def main():
     try:
@@ -756,6 +756,7 @@ def main():
                     continue
                 cor_sequence(knc, source_ip, source_path)
         else:
+            while (not choose_component_key in key_name_component)
             logging.error(txt_error + a_space + txt_in + a_space + txt_the + a_space + txt_key)
     except:
         pass
