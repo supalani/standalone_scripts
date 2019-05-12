@@ -1,0 +1,20 @@
+{
+	"user_root" : "root",
+	"user_ocdn_adm" : "ocdn_adm",
+	"domain_name" : "bitcoin.com",
+	"hn_salt_master" : "reposvr",
+	"hn_primary_dir_controller" : "infernodirctlr",
+	"hn_primary_dir_worker" : "infernodirwrkr",
+	"hn_backup_dir_controller" : "torrentdirctlr",
+	"hn_backup_dir_worker" : "torrentdirwrkr",
+	"hn_traffic_ops" : "infernotraops",
+	"hn_traffic_monitor" : "infernotramntr",
+	"hn_traffic_vault" : "infernotravlt",
+	"hn_traffic_router" : "infernotrartr",
+	"hn_traffic_cache" : ["infernotramc1", "infernotramc2", "infernotraec1", "infernotraec2"],
+	"hn_monitor_node" : ["infernomntr1", "infernomntr2", "torrentmntr1", "torrentmntr2"],
+	"hn_primary_dep_server" : "torrentdepsvr",
+	"hn_standby_dep_server" : "infernodepsvr",
+	"hn_primary_sh" : "torrentsh",
+	"hn_standby_sh" : "infernosh"
+}
