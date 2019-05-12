@@ -289,7 +289,7 @@ def compare_pkg_helper(target_pkg, installed_pkg):
     ip_arr = list(ip.group(1,2,3))
     tp_arr.append(tp.group(4).lstrip('b'))
     ip_arr.append(ip.group(4).lstrip('b'))
-    return True if tp_arr < ip_arr else False
+    return True if tp_arr <= ip_arr else False
 
 ###helper code block for killing existing director gui session
 def restart_dir_gui_helper():
@@ -710,7 +710,7 @@ def apply_post_config():
 def main():
     try:
         block_lable = code_block_lable()
-        print ('\x1b[3;34;46m' + block_lable.next() + '\x1b[0m')
+        print ('\x1b[1;37;40m' + block_lable.next() + '\x1b[0m')
         while True:
             try:
                 source_ip = IPv4Address(unicode(raw_input(txt_source + a_space + txt_ip + a_space + a_colon + a_space)))
@@ -723,34 +723,34 @@ def main():
         source_path = show_status_helper(source_path_helper(raw_input(txt_source + a_space + txt_path + a_space + a_colon + a_space)))
         while source_path == 1:
             source_path = show_status_helper(source_path_helper(raw_input(txt_source + a_space + txt_path + a_space + a_colon + a_space)))
-        print ('\x1b[3;34;46m' + block_lable.next() + '\x1b[0m')
-        print ('\x1b[3;34;46m' + block_lable.next() + '\x1b[0m')
+        print ('\x1b[1;37;40m' + block_lable.next() + '\x1b[0m')
+        print ('\x1b[1;37;40m' + block_lable.next() + '\x1b[0m')
         choose_component_key = str(raw_input(txt_input + a_space + txt_key + a_space + a_colon + a_space))
         if choose_component_key == txt_all:
-            print ('\x1b[3;34;46m' + block_lable.next() + '\x1b[0m')
+            print ('\x1b[1;37;40m' + block_lable.next() + '\x1b[0m')
             for knc in key_name_component:
                 cor_sequence(knc, source_ip, source_path)
         elif choose_component_key == key_name_component[0]:
-            print ('\x1b[3;34;46m' + block_lable.next() + '\x1b[0m')
+            print ('\x1b[1;37;40m' + block_lable.next() + '\x1b[0m')
             cor_sequence(key_name_component[0], source_ip, source_path)
         elif choose_component_key == key_name_component[1]:
-            print('\x1b[3;34;46m' + block_lable.next() + '\x1b[0m')
+            print('\x1b[1;37;40m' + block_lable.next() + '\x1b[0m')
             for knc in key_name_component[0:2]:
                 cor_sequence(knc, source_ip, source_path)
         elif choose_component_key == key_name_component[2]:
-            print('\x1b[3;34;46m' + block_lable.next() + '\x1b[0m')
+            print('\x1b[1;37;40m' + block_lable.next() + '\x1b[0m')
             for knc in key_name_component[0:3]:
                 if knc == key_name_component[1]:
                     continue
                 cor_sequence(knc, source_ip, source_path)
         elif choose_component_key == key_name_component[3]:
-            print('\x1b[3;34;46m' + block_lable.next() + '\x1b[0m')
+            print('\x1b[1;37;40m' + block_lable.next() + '\x1b[0m')
             for knc in key_name_component[0:4]:
                 if knc == key_name_component[1] or knc == key_name_component[2]:
                     continue
                 cor_sequence(knc, source_ip, source_path)
         elif choose_component_key == key_name_component[4]:
-            print('\x1b[3;34;46m' + block_lable.next() + '\x1b[0m')
+            print('\x1b[1;37;40m' + block_lable.next() + '\x1b[0m')
             for knc in key_name_component[0:]:
                 if knc == key_name_component[1] or knc == key_name_component[2] or knc == key_name_component[3]:
                     continue
