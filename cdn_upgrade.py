@@ -1,16 +1,13 @@
 #!/usr/bin/python2.7
 import requests
 import json
-import sys
 import os
 import time
 import re
 import linecache
 import logging
-
 from subprocess import *
 from ipaddress import *
-from urllib3.exceptions import InsecureRequestWarning
 
 # > title
 ## > heading
@@ -19,24 +16,26 @@ from urllib3.exceptions import InsecureRequestWarning
 
 #global variables for pre/post configuration of the omd components
 ##variables for setup.
-user_root = 'root'
-user_ocdn_adm = 'ocdn_adm'
-domain_name = 'bitcoin.com' #domain name for OMD setup
-hn_salt_master = 'reposvr'  #salt master / repo
-hn_primary_dir_ctlr = 'infernodirctlr'  #primary director controller
-hn_primary_dir_wrkr = 'infernodirwrkr'  #primary director worker
-hn_backup_dir_ctlr = 'torrentdirctlr'   #backup director controller
-hn_backup_dir_wrkr = 'torrentdirwrkr'   #backup director worker
-hn_traffic_ops = 'infernotraops'        #traffic ops
-hn_traffic_mntr = 'infernotramntr'      #traffic monitor
-hn_traffic_vlt = 'infernotravlt'        #traffic vault
-hn_traffic_rtr = 'infernotrartr'        #traffic router
-hn_traffic_cache = ('infernotramc1', 'infernotramc2', 'infernotraec1', 'infernotraec2') #list of caches. order must be mid cache and edge cache
-hn_monitor_node = ('infernomntr1', 'infernomntr2', 'torrentmntr1', 'torrentmntr2')  #list of monitor nodes.
-hn_primary_dep_svr = 'torrentdepsvr'    #splunk primary deployment server
-hn_standby_dep_svr = 'infernodepsvr'    #splunk standby deployment server
-hn_primary_sh = 'torrentsh'     #splunk primary summary head
-hn_standby_sh = 'infernosh'     #splunk standby summary head
+with open('setup.json', 'r') as setup:
+    hostname = json.load(setup)
+user_root = hostname["user_root"]
+user_ocdn_adm = hostname["user_ocdn_adm"]
+domain_name = hostname["domain_name"]   #domain name for OMD setup
+hn_salt_master = hostname["hn_salt_master"] #salt master / repo
+hn_primary_dir_ctlr = hostname["hn_primary_dir_controller"] #primary director controller
+hn_primary_dir_wrkr = hostname["hn_primary_dir_worker"]  #primary director worker
+hn_backup_dir_ctlr = hostname["hn_backup_dir_controller"]   #backup director controller
+hn_backup_dir_wrkr = hostname["hn_backup_dir_worker"]   #backup director worker
+hn_traffic_ops = hostname["hn_traffic_ops"] #traffic ops
+hn_traffic_mntr = hostname["hn_traffic_monitor"]    #traffic monitor
+hn_traffic_vlt = hostname["hn_traffic_vault"]   #traffic vault
+hn_traffic_rtr = hostname["hn_traffic_router"]  #traffic router
+hn_traffic_cache = tuple(hostname["hn_traffic_cache"])   #list of caches. order must be mid cache and edge cache
+hn_monitor_node = tuple(hostname["hn_monitor_node"])	#list of monitor nodes.
+hn_primary_dep_svr = hostname["hn_primary_dep_server"]    #splunk primary deployment server
+hn_standby_dep_svr = hostname["hn_standby_dep_server"]    #splunk standby deployment server
+hn_primary_sh = hostname["hn_primary_sh"]	#splunk primary summary head
+hn_standby_sh = hostname["hn_standby_sh"]	#splunk standby summary head
 
 ##variables for general
 no_space = ''
@@ -172,7 +171,7 @@ logging.basicConfig(level=logging.ERROR, format='%(asctime)s %(levelname)s: %(me
 ###helper code block for executing command
 def exec_cmd_helper(exec_cmd):
     exec_cmd_status = Popen(exec_cmd, stdin=None, stdout=PIPE, stderr=PIPE, shell=True)
-    time.sleep(10)
+    time.sleep(3)
     out, err = exec_cmd_status.communicate()
     return err if err is True else out
 
@@ -180,16 +179,12 @@ def exec_cmd_helper(exec_cmd):
 def salt_clear_cache_helper():
     exec_cmd = cmd_salt + a_space + a_single_quote + a_asterisk + a_single_quote + a_space + cmd_salt_4
     exec_cmd_helper(exec_cmd)
-    time.sleep(5)
+    time.sleep(2)
 
 ###helper code block for finding package name
 def find_pkg_helper(pkg_key):
-    txt_pkg_key = ''
-    for i in pkg_key:
-        if i.isdigit():
-            break
-        txt_pkg_key += i
-    return txt_pkg_key + '3' if txt_pkg_key == 'omd-monitor-' else txt_pkg_key
+    txt_pkg_key = re.search(r'([a-z-]+)', pkg_key)
+    return str(txt_pkg_key.group()) + '[0-9]' if txt_pkg_key == 'omd-monitor-' else txt_pkg_key.group()
 
 ###helper code block for omd_cfgtool
 def omd_cfgtool_helper(ul_path):
@@ -201,7 +196,6 @@ def omd_cfgtool_helper(ul_path):
 
 ###helper code block for finding master/minion error when high-state / role-parse
 def log_read_helper(file_name):  # file_read
-    # print 'log file', file_name
     fail_catch_lines, fail_id_string, total_fail_lines, total_fail_count, fail_node = [], [], [], [], []
     with open(file_name, 'r') as log_read:
         # print 'cm', file_name
@@ -215,7 +209,9 @@ def log_read_helper(file_name):  # file_read
                     total_fail_count.append(total_fail_catch.group(2))
                     total_fail_lines.append(line_num)
     for i in fail_catch_lines:
-        temp = linecache.getline(file_name, i - 3).strip(' \n')
+        id_line_1 = linecache.getline(file_name, i - 3).strip(' \n')
+        id_line_2 = linecache.getline(file_name, i - 2).strip(' \n')
+        temp = id_line_2 if id_line_1.startswith('--') else id_line_1
         temp_2 = temp.replace('ID: ', '')
         fail_id_string.append(temp_2)
         linecache.clearcache()
@@ -267,10 +263,6 @@ def skip_white_line_helper(swl):
     for i in swl.splitlines():
         return i
 
-###helper code block for skipping lines after first when rpm -U
-def strip_line_helper(a):
-    return re.sub(r'\n', '', a)
-
 ###helper code block for finding rpm version
 def rpm_version_helper(rpm_name):
     exec_cmd = txt_rpm_format + a_space + a_dash + txt_rpm_chk_attribute + a_space + a_pipe + a_space + cmd_grep + a_space + rpm_name
@@ -313,7 +305,6 @@ def restart_dir_gui_helper():
 
 ###helper code block for cache server list
 def list_cache_server_helper():
-    requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
     director_ui_login = '{"username":"omdadmin","password":"default"}'
     web_protocol = 'https'
     api_base_url = web_protocol + a_colon + 2 * a_fwd_slash + hn_primary_dir_wrkr + a_colon
@@ -332,7 +323,6 @@ def list_cache_server_helper():
 
 ###helper code block for cache admin status
 def cache_admin_status_helper(cache_name, admin_status):
-    requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
     cache_name = str(cache_name)
     admin_status = str(admin_status)
     list_cache_server_helper()
@@ -352,7 +342,7 @@ def cache_admin_status_helper(cache_name, admin_status):
     filter_cache_server.update({"admin_status": admin_status})
     api_server_list = api_base_url + '8099/OMDCdnMgr/server/' + str(cache_server_id)
     restart_dir_gui = restart_dir_gui_helper()
-    time.sleep(15)
+    time.sleep(5)
     ui_login_api = requests.post(api_login, data = director_ui_login, verify = False)
     server_list_api = requests.put(api_server_list, cookies = ui_login_api.cookies, verify = False, data = json.dumps(filter_cache_server))
     logging.info(cache_name + a_space + txt_is + a_space + admin_status) # + a_space + str(server_list_api.status_code)
@@ -448,7 +438,7 @@ def source_server_list_file(sip = None, spath = None, pass_send_key = None):
             for i in monitor_send_key:
                 if compare_pkg_helper(i, rpm_version_helper(send_key)):
                     logging.error(txt_source + a_space + txt_package + a_space + txt_is + ' older or same ' + txt_version + \
-                          ' than ' + txt_install + txt_ed + a_space + txt_version)
+                          ' than ' + txt_install + txt_ed + a_space + txt_version + a_line)
                     pkg_ver_match = 1
             if pkg_ver_match == 0:
                 pass_send_key.send(monitor_send_key)
@@ -572,7 +562,7 @@ def apply_pre_config(pass_send_key = None):
         exec_cmd_3 = upgrade_log_path + a_fwd_slash + txt_role + a_underbar + txt_parse + a_underbar + txt_log + a_dot + txt_txt_format
         if key_name_component[0] in send_key: #salt
             os.mkdir(upgrade_log_path)
-            logging.info(txt_execute[:6] + txt_ing + 3 * a_dot + a_space + 'refresh pillar files')
+            logging.info(txt_execute[:6] + txt_ing + 3 * a_dot + a_space + 'refresh pillar file')
             exec_cmd_helper("salt '*' saltutil.refresh_pillar >> " + upgrade_log_path + "/refresh_pillar_log.txt")
             logging.info(txt_execute[:6] + txt_ing + 3 * a_dot + a_space + cmd_cfgtool + a_space + 2 * a_dash + txt_upgrade)
             omd_cfgtool_helper(upgrade_log_path)
@@ -601,6 +591,7 @@ def apply_pre_config(pass_send_key = None):
             omd_cfgtool_helper(upgrade_log_path)
             error_log_helper(exec_cmd_3)
         pass_send_key.send(send_key)
+
 def apply_high_state(pass_send_key = None):
     while True:
         send_key = (yield)
@@ -685,7 +676,7 @@ def apply_high_state(pass_send_key = None):
                 logging.info(txt_execute[0:-1] + txt_ing + a_space + txt_highstate + 3 * a_dot + a_space + sshl)
                 high_state_helper(sshl)
                 time.sleep(5)
-            logging.info(txt_execute[0:-1] + txt_ing + a_space + txt_highstate + 3 * a_dot + a_space + role_splunk_ssh[6:])
+            logging.info(txt_execute[0:-1] + txt_ing + a_space + txt_highstate + 3 * a_dot + a_space + role_splunk_ssh)
             high_state_helper(role_splunk_ssh)
             time.sleep(5)
             pass_send_key.send(send_key)
@@ -710,10 +701,10 @@ def apply_post_config():
             salt_clear_cache_helper()
         elif key_name_component[3] in send_key: #monitor and monitor client
             salt_clear_cache_helper()
-            logging.info('please verify the MONITOR installation manually as OMD Install and Upgrade Guide recommended')
+            logging.info('verify the MONITOR installation manually as OMD Upgrade Guide recommended')
         elif key_name_component[4] in send_key: # insight
             salt_clear_cache_helper()
-            logging.info('please verify the INSIGHT installation manually as OMD Install and Upgrade Guide recommended')
+            logging.info('verify the INSIGHT installation manually as OMD Upgrade Guide recommended')
         logging.info(send_key + txt_install + a_space + txt_is + a_space + txt_complete + txt_ed[-1] + a_line)
 #main funtion
 def main():
