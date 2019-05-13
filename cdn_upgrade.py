@@ -198,7 +198,6 @@ def omd_cfgtool_helper(ul_path):
 def log_read_helper(file_name):  # file_read
     fail_catch_lines, fail_id_string, total_fail_lines, total_fail_count, fail_node = [], [], [], [], []
     with open(file_name, 'r') as log_read:
-        # print 'cm', file_name
         for line_num, line_txt in enumerate(log_read, start=1):
             fail_catch = re.search(r'(Result:\sFalse)', line_txt)
             if fail_catch:
@@ -395,7 +394,7 @@ def cor_sequence(knc, source_ip, source_path):
 def source_path_helper(sp):
     return 1 if sp[:] == '' or sp[-1] == a_fwd_slash or sp[0] != a_fwd_slash else sp
 
-###printing error statement    
+###printing error statement
 def show_status_helper(source_path = None):
     if source_path == 1:
         logging.error(txt_error + a_space + txt_in + a_space + txt_given + a_space + txt_path + a_space + txt_format)
@@ -421,7 +420,7 @@ def process_menu(pass_knc = None, pass_send_key = None):
 def source_server_list_file(sip = None, spath = None, pass_send_key = None):
     while True:
         send_key = (yield)
-        monitor_send_key = []
+        monitor_send_key, list_monitor_rpm = [], []
         other_send_key = ''
         exec_cmd = txt_ssh  + a_space + user_root + a_at + sip + a_space + cmd_list + a_space + spath
         if send_key != key_name_component[3]:
@@ -435,10 +434,12 @@ def source_server_list_file(sip = None, spath = None, pass_send_key = None):
                     monitor_send_key.append(i)
         if monitor_send_key:
             pkg_ver_match = 0 # value will be 1 if version is older or same, default is 0
-            for i in monitor_send_key:
-                if compare_pkg_helper(i, rpm_version_helper(send_key)):
+            list_monitor_rpm.append(rpm_version_helper(send_key).splitlines())
+            list_monitor_rpm_rm_nest_list = [j for i in list_monitor_rpm for j in i]
+            for i,j in zip(monitor_send_key, list_monitor_rpm_rm_nest_list):
+                if compare_pkg_helper(i, j):
                     logging.error(txt_source + a_space + txt_package + a_space + txt_is + ' older or same ' + txt_version + \
-                          ' than ' + txt_install + txt_ed + a_space + txt_version + a_line)
+                          ' than ' + txt_install + txt_ed + a_space + txt_version)
                     pkg_ver_match = 1
             if pkg_ver_match == 0:
                 pass_send_key.send(monitor_send_key)
@@ -483,12 +484,12 @@ def untar_file(pass_send_key = None):
             exec_cmd = cmd_tar + a_space + txt_tar_attribute + a_space + send_key
             logging.info(txt_extract + txt_ing + 3 * a_dot + a_space + send_key)
             exec_cmd_status = exec_cmd_helper(exec_cmd)
-            for i in exec_cmd_status.splitlines():                
+            for i in exec_cmd_status.splitlines():
                 pass_send_key.send(i)
                 break
         else:
             pass_send_key.send(send_key)
-            
+
 def show_current_rpm(pass_send_key = None):
     while True:
         send_key = (yield)
@@ -503,7 +504,7 @@ def show_current_rpm(pass_send_key = None):
             find_pkg = skip_white_line_helper(rpm_version_helper(find_pkg_helper(send_key)))
             logging.info(txt_current + a_space + txt_rpm_format + a_space + txt_version + a_space + txt_is + 3 * a_dot  + a_space + find_pkg)
             pass_send_key.send(send_key)
-        
+
 def upgrade_rpm(pass_send_key = None):
     while True:
         send_key = (yield)
@@ -536,7 +537,7 @@ def show_upgraded_rpm(pass_send_key = None):
             find_pkg = skip_white_line_helper(rpm_version_helper(find_pkg_helper(send_key)))
             logging.info(txt_upgrade[0:6] + txt_ed + a_space + txt_version + a_space + txt_is + 3 * a_dot + a_space + find_pkg)
             pass_send_key.send(send_key)
-        
+
 def rm_source_rpm_tar(pass_send_key = None):
     while True:
         send_key = (yield)
@@ -683,7 +684,7 @@ def apply_high_state(pass_send_key = None):
 
 def apply_post_config():
     while True:
-        send_key = (yield)        
+        send_key = (yield)
         if key_name_component[0] in send_key: #salt
             exec_cmd = key_name_component[0] + a_space + a_double_quote + a_asterisk + a_double_quote + a_space + cmd_salt_1 + a_space + \
                        txt_base + a_underbar + txt_package + a_underbar + txt_install + a_space + 2 * a_r_arrow + a_space + upgrade_log_path + a_fwd_slash + \
@@ -756,13 +757,11 @@ def main():
                     continue
                 cor_sequence(knc, source_ip, source_path)
         else:
-            while (not choose_component_key in key_name_component)
             logging.error(txt_error + a_space + txt_in + a_space + txt_the + a_space + txt_key)
     except:
         pass
     finally:
         pass
-        # sys.exit(0)
 
 if __name__ == '__main__':
     main()
